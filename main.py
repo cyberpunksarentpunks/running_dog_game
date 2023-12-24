@@ -75,10 +75,11 @@ gunX = random.randint(0, 1100)
 gunY = - 500
 gunX_change = 0
 gunY_change = 1
-gun_state = False
+gun_state = "ready"
+gun_ammo = 5
 
 drop_origin_img = pygame.image.load("img/drop.png")
-drop_size = (50,50)
+drop_size = (90,90)
 drop_icon = pygame.transform.scale(drop_origin_img, drop_size)
 dropX = 0
 dropY = 650
@@ -86,6 +87,14 @@ dropX_change = 0
 dropY_change = 3
 drop_state = "ready"
 
+bottle_origin_img = pygame.image.load("img/bottle.png")
+bottle_size = (60,60)
+bottle_icon = pygame.transform.scale(bottle_origin_img, bottle_size)
+bottleX = 0
+bottleY = 650
+bottleX_change = 0
+bottleY_change = 1
+bottle_full = 5
 
 score = 0
 
@@ -100,6 +109,9 @@ def food_spawn(x, y):
     
 def gun_spawn(x, y):
     screen.blit(gun_icon, (x,y))
+
+def bottle_spawn(x, y):
+    screen.blit(bottle_icon, (x,y))
 
 def fire_bone(x, y):
     global bone_state
@@ -137,6 +149,12 @@ def gun_collision(gunX,gunY,playerX,playerY):
         return True
     else:
         return False
+def bottle_collision(bottleX,bottleY,playerX,playerY):
+    distance = math.sqrt(math.pow(bottleX-playerX,2) + (math.pow(bottleY-playerY,2)))
+    if distance < 65:
+        return True
+    else:
+        return False
 # --------------------------------------------------------------
 # _game loop_
 running = True
@@ -166,13 +184,14 @@ while running:
                 print(bone_state)
                 
             if event.key == pygame.K_LCTRL:
-                print("LCtrl is pressed")
-                gun_state = "fire"
-                drop_state = "fire"
-                gunX = playerX
-                fire_water(dropX, dropY)
-                
-            
+                if gun_ammo != 0:      
+                    print("LCtrl is pressed")
+                    gun_state = "fire"
+                    dropX = playerX
+                    gunX = playerX
+                    fire_water(dropX, dropY)
+                else:
+                    gun_state = "ready"
 
             if event.key == pygame.K_ESCAPE:
                 print("Game has been canceled")
@@ -197,15 +216,19 @@ while running:
     cat6.y += cat6.y_change
     foodY += foodY_change
     gunY += gunY_change
+    bottleY += bottleY_change
+    
     #boneX = playerX
     # boneY = playerY
+        
     
-    if drop_state == "fire":
+    if gun_state == "fire":
         fire_water(dropX,dropY)
         dropY -= dropY_change
-        if dropY < 0:       # checks if a bone reached the top
+        gun_ammo -= 1
+        if dropY < 0:       # checks if a water drop reached the top
             dropY = 650
-            drop_state = "ready"
+            gun_state = "ready"
 
     # bone fire movement
     if bone_state == "fire":
@@ -215,7 +238,55 @@ while running:
             boneY = 650
             bone_state = "ready"
 
-    # ------collision between CAT and BONE/bullet-------------
+    # ------collision between CAT and BONE/bullets-------------
+    collisionW1 = is_collision(cat1.x,cat1.y,dropX,dropY)
+    if collisionW1:
+        dropY = 650
+        drop_state = "ready"
+        score += 1
+        print(f"You hit the cat. Score is {score}")
+        cat1.x = random.randint(0, 1100)
+        cat1.y = random.randint(-300,50)
+    collisionW2 = is_collision(cat2.x,cat2.y,dropX,dropY)
+    if collisionW2:
+        dropY = 650
+        drop_state = "ready"
+        score += 1
+        print(f"You hit the cat. Score is {score}")
+        cat2.x = random.randint(0, 1100)
+        cat2.y = random.randint(-300,50)
+    collisionW3 = is_collision(cat3.x,cat3.y,dropX,dropY)
+    if collisionW3:
+        dropY = 650
+        drop_state = "ready"
+        score += 1
+        print(f"You hit the cat. Score is {score}")
+        cat3.x = random.randint(0, 1100)
+        cat3.y = random.randint(-300,50)
+    collisionW4 = is_collision(cat4.x,cat4.y,dropX,dropY)
+    if collisionW4:
+        dropY = 650
+        drop_state = "ready"
+        score += 1
+        print(f"You hit the cat. Score is {score}")
+        cat4.x = random.randint(0, 1100)
+        cat4.y = random.randint(-300,50)
+    collisionW5 = is_collision(cat5.x,cat5.y,dropX,dropY)
+    if collisionW5:
+        dropY = 650
+        drop_state = "ready"
+        score += 1
+        print(f"You hit the cat. Score is {score}")
+        cat5.x = random.randint(0, 1100)
+        cat5.y = random.randint(-300,50)
+    collisionW6 = is_collision(cat6.x,cat6.y,dropX,dropY)
+    if collisionW6:
+        dropY = 650
+        drop_state = "ready"
+        score += 1
+        print(f"You hit the cat. Score is {score}")
+        cat6.x = random.randint(0, 1100)
+        cat6.y = random.randint(-300,50)    
     
     collision = is_collision(cat1.x,cat1.y,boneX,boneY)
     if collision:
@@ -315,7 +386,7 @@ while running:
         print("Cat took 1 life from you")
         if player_lives == 0:
             running = False
-    #-------------------Food and Gun collision-------------------------------------------
+    #-------------------Food, bottle and Gun collision-------------------------------------------
     f_collision = food_collision(foodX,foodY,playerX,playerY)
     if f_collision:
         player_lives += 1
@@ -330,7 +401,12 @@ while running:
         player_gun = True
         print("You found a water gun")  
     
-        
+    b_collision = bottle_collision(bottleX,bottleY,playerX,playerY)
+    if b_collision:
+        bottleX = random.randint(0,1100)
+        bottleY = random.randint(-1000,-50)
+        gun_ammo += bottle_full
+        print("You found a water bottle")     
             
     # Creating borders of map
     if playerX <= 0:
@@ -338,7 +414,7 @@ while running:
     elif playerX >= 1100:
         playerX = 1100
 
-    
+   
     player(playerX, playerY)
     enemy(cat1.x, cat1.y)
     enemy(cat2.x,cat2.y)
@@ -348,6 +424,7 @@ while running:
     enemy(cat6.x,cat6.y)
     food_spawn(foodX, foodY)
     gun_spawn(gunX,gunY)
+    bottle_spawn(bottleX, bottleY)
     
     if player_gun:
         screen.blit(gun_icon, (playerX + 10,playerY+35))
@@ -383,111 +460,16 @@ while running:
     #     enemy2Y = -100
     #     enemy2X = random.randint(0, 1100)
     if foodY == 800:
-        print("food has been respawned")
+        print("Food has been respawned")
         foodY = -100
         foodX = random.randint(0, 1100)
     if gunY == 800:
-        print("gun has been respawned")
+        print("Gun has been respawned")
         gunY = -100
         gunX = random.randint(0, 1100)
-    
+    if bottleY == 800:
+        print("Bottle has been respawned")
+        bottleY = -100
+        bottleX = random.randint(0, 1100)
+        
     pygame.display.update()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
