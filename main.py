@@ -80,7 +80,7 @@ gun_ammo = 5
 
 drop_origin_img = pygame.image.load("img/drop.png")
 drop_size = (90,90)
-drop_icon = pygame.transform.scale(drop_origin_img, drop_size)
+drop_icon = pygame.transform.scale(pygame.transform.rotate(drop_origin_img, 180), drop_size)
 dropX = 0
 dropY = 650
 dropX_change = 0
