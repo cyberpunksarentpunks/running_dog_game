@@ -40,13 +40,16 @@ player_gun = False
 # num_of_enemies = 6
 
 enemy_icon = pygame.transform.scale(pygame.image.load("img/cat.png"), (80,100))
-cat1 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-300,50),enemyX_change=0,enemyY_change=1)
-cat2 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-300,50),enemyX_change=0,enemyY_change=1)
-cat3 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-300,50),enemyX_change=0,enemyY_change=1)
-cat4 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-300,50),enemyX_change=0,enemyY_change=1)
-cat5 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-300,50),enemyX_change=0,enemyY_change=1)
-cat6 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-300,50),enemyX_change=0,enemyY_change=1)
-
+devil_icon = pygame.transform.scale(pygame.image.load("img/devil.png"), (100,100))
+paw_origin_icon = pygame.transform.scale(pygame.image.load("img/icon.png"), (50,50))
+paw_icon = pygame.transform.rotate(paw_origin_icon, 180)
+cat1 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-400,0),enemyX_change=0,enemyY_change=1,health=1)
+cat2 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-400,0),enemyX_change=0,enemyY_change=1,health=1)
+cat3 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-300,0),enemyX_change=0,enemyY_change=1,health=1)
+cat4 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-300,0),enemyX_change=0,enemyY_change=1,health=1)
+cat5 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-300,0),enemyX_change=0,enemyY_change=1,health=1)
+cat6 = Enemy(icon=enemy_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-400,0),enemyX_change=0,enemyY_change=1,health=1)
+cat_boss = Enemy(icon=devil_icon,enemyX=random.randint(0, 1100),enemyY=random.randint(-400,0),enemyX_change=0,enemyY_change=0.8,health=2)
 
 
 # bone/bullet -ready state- cannot be seem
@@ -72,11 +75,11 @@ gun_origin_img = pygame.image.load("img/gun.png")
 gun_size = (70,70)
 gun_icon = pygame.transform.scale(gun_origin_img, gun_size)
 gunX = random.randint(0, 1100)
-gunY = - 500
+gunY = - 1000
 gunX_change = 0
 gunY_change = 1
 gun_state = "ready"
-gun_ammo = 5
+gun_ammo = 0
 
 drop_origin_img = pygame.image.load("img/drop.png")
 drop_size = (90,90)
@@ -98,11 +101,25 @@ bottle_full = 5
 
 score = 0
 
+# Create a font object
+font = pygame.font.Font(None, 36)  # Use default system font with size 36
+
+# Create a text surface
+score_surface = font.render(f"Skóre = {score}", True, (255, 255, 255))  
+
+score_rect = score_surface.get_rect()
+
+# Set the initial position to the left
+score_rect.center = (WIDTH - 100, HEIGHT // 2)
+
 def player(x, y):
     screen.blit(player_icon, (x, y))
 
 def enemy(x, y):
     screen.blit(cat1.icon, (x, y))
+    
+def enemy_boss(x, y):
+    screen.blit(cat_boss.icon, (x, y))
 
 def food_spawn(x, y):
     screen.blit(food_icon, (x, y))
@@ -122,6 +139,11 @@ def fire_water(x, y):
     global drop_state
     drop_state = "fire"
     screen.blit(drop_icon, (x,y))
+    
+# def cat_fire(pawX,pawY):
+#     paw = screen.blit(paw_icon, (pawX, pawY))
+#     pawY += 1
+    
     
 def is_collision(enemyX,enemyY,boneX,boneY):
     distance = math.sqrt(math.pow(enemyX-boneX,2) + (math.pow(enemyY-boneY,2)))
@@ -170,10 +192,10 @@ while running:
         # if key stroke is pressed check whether its right or left
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                playerX_change = -1.5
+                playerX_change = -5
                 print("Left arrow is pressed")
             if event.key == pygame.K_RIGHT:
-                playerX_change = 1.5
+                playerX_change = 5
                 print("Right arrow is pressed")
 
             if event.key == pygame.K_SPACE:
@@ -189,7 +211,9 @@ while running:
                     gun_state = "fire"
                     dropX = playerX
                     gunX = playerX
+                    gun_ammo -= 1
                     fire_water(dropX, dropY)
+                    print(f"Zbývá {gun_ammo} nábojů")
                 else:
                     gun_state = "ready"
 
@@ -205,7 +229,22 @@ while running:
                 print("Backspace has been released")
                 #bone_state = "ready"
                 
-
+    # Create a text surface
+    score_surface = font.render(f"Score = {score}", True, (255, 255, 255))
+    score_rect = score_surface.get_rect()
+    # Set the initial position to the left
+    score_rect.center = (WIDTH - 100, HEIGHT // 2)
+    
+    lives_surface = font.render(f"Lives = {player_lives}", True, (255, 255, 255))
+    lives_rect = lives_surface.get_rect()
+    # Set the initial position to the left
+    lives_rect.center = (WIDTH - 100, HEIGHT // 2 - 100)
+    
+    shots_surface = font.render(f"Water shots = {gun_ammo}", True, (255, 255, 255))
+    shots_rect = shots_surface.get_rect()
+    # Set the initial position to the left
+    shots_rect.center = (WIDTH - 100, HEIGHT // 2 - 50)
+    
     # moving across axis            
     playerX += playerX_change
     cat1.y += cat1.y_change
@@ -214,18 +253,25 @@ while running:
     cat4.y += cat4.y_change
     cat5.y += cat5.y_change
     cat6.y += cat6.y_change
+    cat_boss.y += cat_boss.y_change
     foodY += foodY_change
     gunY += gunY_change
     bottleY += bottleY_change
     
     #boneX = playerX
     # boneY = playerY
-        
+    
+    # If Boss Cat goes beyond some point. paw will occur towards the player
+    # threshold = 10
+    # if 390 <= cat_boss.y <= 410:
+    #     print("The cat crossed the line")
+    #     cat_fire(pawX, pawY)
+    
     
     if gun_state == "fire":
         fire_water(dropX,dropY)
         dropY -= dropY_change
-        gun_ammo -= 1
+                    
         if dropY < 0:       # checks if a water drop reached the top
             dropY = 650
             gun_state = "ready"
@@ -239,6 +285,18 @@ while running:
             bone_state = "ready"
 
     # ------collision between CAT and BONE/bullets-------------
+    collisionB1 = is_collision(cat_boss.x,cat_boss.y,dropX,dropY)
+    if collisionB1:
+        dropY = 650
+        drop_state = "ready"
+        score += 1
+        cat_boss.hp -= 1
+        if cat_boss.hp == 0:
+            cat_boss.x = random.randint(0, 1100)
+            cat_boss.y = random.randint(-10000,-5000)
+        print(f"You hit the cat. Score is {score}")
+        cat1.x = random.randint(0, 1100)
+        cat1.y = random.randint(-300,50)
     collisionW1 = is_collision(cat1.x,cat1.y,dropX,dropY)
     if collisionW1:
         dropY = 650
@@ -288,6 +346,15 @@ while running:
         cat6.x = random.randint(0, 1100)
         cat6.y = random.randint(-300,50)    
     
+    collisionBossBone = is_collision(cat_boss.x,cat_boss.y,boneX,boneY)
+    if collisionBossBone:
+        boneY = 650
+        bone_state = "ready"
+        score += 1
+        cat_boss.hp -= 1
+        if cat_boss.hp == 0:
+            cat_boss.x = random.randint(0, 1100)
+            cat_boss.y = random.randint(-10000,-5000)
     collision = is_collision(cat1.x,cat1.y,boneX,boneY)
     if collision:
         boneY = 650
@@ -345,6 +412,7 @@ while running:
         cat1.y = random.randint(-300,50)
         print("Cat took 1 life from you")
         if player_lives == 0:
+            print(f"Final score is {score}")
             running = False
     p_collision2 = player_collision(cat2.x,cat2.y,playerX,playerY)
     if p_collision2:
@@ -353,6 +421,7 @@ while running:
         cat2.y = random.randint(-300,50)
         print("Cat took 1 life from you")
         if player_lives == 0:
+            print(f"Final score is {score}")
             running = False
     p_collision3 = player_collision(cat3.x,cat3.y,playerX,playerY)
     if p_collision3:
@@ -361,6 +430,7 @@ while running:
         cat3.y = random.randint(-300,50)
         print("Cat took 1 life from you")
         if player_lives == 0:
+            print(f"Final score is {score}")
             running = False
     p_collision4 = player_collision(cat4.x,cat4.y,playerX,playerY)
     if p_collision4:
@@ -369,6 +439,7 @@ while running:
         cat4.y = random.randint(-300,50)
         print("Cat took 1 life from you")
         if player_lives == 0:
+            print(f"Final score is {score}")
             running = False
     p_collision5 = player_collision(cat5.x,cat5.y,playerX,playerY)
     if p_collision5:
@@ -377,7 +448,9 @@ while running:
         cat5.y = random.randint(-300,50)
         print("Cat took 1 life from you")
         if player_lives == 0:
+            print(f"Final score is {score}")
             running = False
+            
     p_collision6 = player_collision(cat6.x,cat6.y,playerX,playerY)
     if p_collision6:
         player_lives -= 1
@@ -385,26 +458,38 @@ while running:
         cat6.y = random.randint(-300,50)
         print("Cat took 1 life from you")
         if player_lives == 0:
+            print(f"Final score is {score}")
             running = False
+
+    p_collisionBoss1 = player_collision(cat_boss.x,cat_boss.y,playerX,playerY)
+    if p_collisionBoss1:
+        player_lives -= 1
+        cat_boss.x = random.randint(0,1100)
+        cat_boss.y = random.randint(-300,50)
+        print("Cat took 1 life from you")
+        if player_lives == 0:
+            print(f"Final score is {score}")
+            running = False
+            
     #-------------------Food, bottle and Gun collision-------------------------------------------
     f_collision = food_collision(foodX,foodY,playerX,playerY)
     if f_collision:
         player_lives += 1
         foodX = random.randint(0,1100)
-        foodY = random.randint(-1000,-10)
+        foodY = random.randint(-4000,-1000)
         print("You gained +1 health")
         
     g_collision = gun_collision(gunX,gunY,playerX,playerY)
     if g_collision:
         gunX = random.randint(0,1100)
-        gunY = random.randint(-5000,-2000)
+        gunY = random.randint(-10000,-5000)
         player_gun = True
         print("You found a water gun")  
     
     b_collision = bottle_collision(bottleX,bottleY,playerX,playerY)
     if b_collision:
         bottleX = random.randint(0,1100)
-        bottleY = random.randint(-1000,-50)
+        bottleY = random.randint(-2000,-500)
         gun_ammo += bottle_full
         print("You found a water bottle")     
             
@@ -422,9 +507,14 @@ while running:
     enemy(cat4.x,cat4.y)
     enemy(cat5.x,cat5.y)
     enemy(cat6.x,cat6.y)
+    enemy_boss(cat_boss.x,cat_boss.y)
     food_spawn(foodX, foodY)
     gun_spawn(gunX,gunY)
     bottle_spawn(bottleX, bottleY)
+    
+    
+        
+        
     
     if player_gun:
         screen.blit(gun_icon, (playerX + 10,playerY+35))
@@ -433,43 +523,66 @@ while running:
     # respawning enemy after they cross down line
     if cat1.y == 800:
         print("enemy goes to end")
+        score -= 1
         cat1.y = 0
         cat1.x = random.randint(0, 1100)
     if cat2.y == 800:
         print("enemy goes to end")
+        score -= 1
         cat2.y = 0
         cat2.x = random.randint(0, 1100)
     if cat3.y == 800:
         print("enemy goes to end")
+        score -= 1
         cat3.y = -30
         cat3.x = random.randint(0, 1100)
     if cat4.y == 800:
         print("enemy goes to end")
+        score -= 1
         cat4.y = -50
         cat4.x = random.randint(0, 1100)
     if cat5.y == 800:
         print("enemy goes to end")
+        score -= 1
         cat5.y = -50
         cat5.x = random.randint(0, 1100)
     if cat6.y == 800:
         print("enemy goes to end")
+        score -= 1
         cat6.y = -50
         cat6.x = random.randint(0, 1100)
+    if cat_boss.y == 800:
+        print("Boss has been respawned")
+        score -= 1
+        cat_boss.x = random.randint(0, 1100)
+        cat_boss.y = random.randint(-1000,-500)
     # if enemy2Y == 800:
     #     print("enemy2 goes to end")
     #     enemy2Y = -100
     #     enemy2X = random.randint(0, 1100)
     if foodY == 800:
         print("Food has been respawned")
-        foodY = -100
+        foodY = -7000
         foodX = random.randint(0, 1100)
     if gunY == 800:
         print("Gun has been respawned")
-        gunY = -100
+        gunY = -10000
         gunX = random.randint(0, 1100)
     if bottleY == 800:
         print("Bottle has been respawned")
-        bottleY = -100
+        bottleY = -5000
         bottleX = random.randint(0, 1100)
         
+    # --------TEXT-----------------------------------------------------    
+    # Move the text to the right
+    score_rect.x + 500  # Adjust this value to control the speed of movement
+
+    # Wrap the text back to the left if it goes beyond the screen
+    if score_rect.left > WIDTH:
+        score_rect.right = 0
+
+    screen.blit(score_surface, score_rect)
+    screen.blit(lives_surface, lives_rect)
+    screen.blit(shots_surface, shots_rect)
     pygame.display.update()
+
