@@ -5,7 +5,7 @@
 # - health is a health :D
 # - weapon = if a character pick some weapon or already has any(for enemies), the type of weapon should be passed as a string here. Default value is 'none'
 # - weapon_ammo = how much "bullets" for that weapon a character has.
-# - weapon_action = Default state value is "still". When a character fires, it changes to "fire"
+# - weapon_action = Default state value is "none". When a character fires, it changes to "fire"
 # - score = score :D
 # - running = ...
 
