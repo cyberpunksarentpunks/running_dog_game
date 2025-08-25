@@ -61,11 +61,11 @@ class Character:
             print("Right arrow is pressed")
         if keys[pygame.K_SPACE]:
             self.wp_action = "fire"
-            # if self.wp_action == "fire":
-            #     bone.bone_shoot(self.x, self.y)    
-            #     print("shoot")
-            #     if bone.y < 0:
-            #         self.wp_action = "ready"
+            if self.wp_action == "fire":
+                bone.bone_shoot(self.x, self.y)    
+                print("shoot")
+                if bone.y < 0:
+                    self.wp_action = "ready"
         if keys[pygame.K_ESCAPE]:
             print("Game has been canceled")
             self.running = False
@@ -103,6 +103,7 @@ class Enemy(Character):
         if self.y > HEIGHT:
             self.y = random.randint(-200, 0)
             self.x = random.randint(0, WIDTH)
+            print("Character passed")
     
 
     
