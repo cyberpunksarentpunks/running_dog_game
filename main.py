@@ -30,15 +30,17 @@ RED = (255, 0, 0)
 pygame.display.set_caption("Running Dog")
 icon = pygame.image.load("img/icon.png").convert()
 pygame.display.set_icon(icon)
+
+# Backround game map
 bg_map = pygame.image.load("img/bg_map.jpg").convert()
 bg_size = (1024, 800)
 bg_set = pygame.transform.scale(bg_map, bg_size)
 
 
 # Character and object creations
-player = Character(icon="dog.png", posX=200, posY=600, posX_change=15, posY_change=0, health=1, weapon="none", weapon_ammo="none", weapon_action="none", score=0, running=True)
-cat1 = Enemy(icon="cat.png", posX=400, posY=100, posX_change=0, posY_change=2.5, health=1, weapon="none", weapon_ammo="none", weapon_action="none", score=None, running=True)
-cat2 = Enemy(icon="cat.png", posX=100, posY=100, posX_change=0, posY_change=2.5, health=1, weapon="none", weapon_ammo="none", weapon_action="none", score=None, running=True)
+player = Character(icon="img/dog.png", posX=200, posY=600, posX_change=5, posY_change=0, health=1, weapon="none", weapon_ammo="none", weapon_action="none", score=0, running=True)
+cat1 = Enemy(icon="img/cat.png", posX=400, posY=100, posX_change=0, posY_change=1, health=1, weapon="none", weapon_ammo="none", weapon_action="none", score=None, running=True)
+cat2 = Enemy(icon="img/cat.png", posX=100, posY=100, posX_change=0, posY_change=1, health=1, weapon="none", weapon_ammo="none", weapon_action="none", score=None, running=True)
 
 bone = Bullet(image="img/bone.png", image_size=(40,50), bullet_state="ready", damage=1, speed=10, posX=player.x, posY=player.y, X_change=0, Y_change=5)
 
@@ -94,15 +96,14 @@ def menu_loop():
                     mouse_pos = event.pos
                     if play_button.collidepoint(mouse_pos):
                         print("Play button clicked!")
-                        singleplayer_game_loop()
+                        return "play"
                     elif highscore_button.collidepoint(mouse_pos):
                         print("Highscore button clicked!")
                         display_highscores()
                     elif quit_button.collidepoint(mouse_pos):
                         print("Quit button clicked!")
-                        running = False
-                        pygame.quit()
-
+                        return "quit"
+                     
                         
 
         pygame.display.flip()
@@ -122,16 +123,16 @@ def singleplayer_game_loop():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
             print("Game has been canceled")
-            running = False
-            menu_loop()
+            return "menu"
+
         
         # <- ALL OF THIS IS CREATING INFINITE RECURSION -> NEEDS TO BE SOLVED  !!!!
-        # if player.wp_action == "fire":
-            # bone.bone_shoot(player.x, player.y)
-            # for each_enemy in enemies_list:
-            #     hit = player.is_collision(each_enemy.x, each_enemy.y, bone.x, bone.y, 40)
-            #     if hit:
-            #         player.player_attacked()  
+        if player.wp_action == "fire":
+            bone.bone_shoot(player.x, player.y)
+            for each_enemy in enemies_list:
+                hit = player.is_collision(each_enemy.x, each_enemy.y, bone.x, bone.y, 40)
+                if hit:
+                    player.player_attacked()  
                      
         
         player.draw_character("img/dog.png", (100,100))
@@ -151,10 +152,18 @@ def singleplayer_game_loop():
     
     
 # MAIN PROGRAM LOOP
-running = True
-while running:
-    menu_loop()
-    singleplayer_game_loop()
+def main():
+    running = True
+    state = "menu"
+    while running:
+        if state == "menu":
+            state = menu_loop()
+        elif state == "play":
+            state = singleplayer_game_loop()
+        elif state == "quit":
+            running = False
+
+main()
 
 pygame.quit()
 sys.exit()

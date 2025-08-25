@@ -20,7 +20,6 @@ class Bullet:
     def bone_shoot(self, playerX, playerY):
         import pygame
         from main import screen     
-        self.bone_shoot(playerX, playerY)
         load_image = pygame.image.load("img/bone.png")
         image_scaled = pygame.transform.scale(load_image, (40,50))
         
